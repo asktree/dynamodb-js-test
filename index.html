@@ -51,7 +51,7 @@ function onSignIn(googleUser) {
 					};
 					docClient.put(params, function (err, data) {
 						if (err) {
-							document.getElementById('textarea').innerHTML += "Unable to add movie: " + count + movie.title + "\n";
+							document.getElementById('textarea').innerHTML += "Unable to add movie: " + movie.title + "\n";
 							document.getElementById('textarea').innerHTML += "Error JSON: " + JSON.stringify(err) + "\n";
 						} else {
 							document.getElementById('textarea').innerHTML += "PutItem succeeded: " + movie.title + "\n";
