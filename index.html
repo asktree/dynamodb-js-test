@@ -24,11 +24,43 @@ AWS.config.credentials = new AWS.CognitoIdentityCredentials({
 });
 
 var dynamodb = new AWS.DynamoDB({region: 'us-east-2'});
+var docClient = new AWS.DynamoDB.DocumentClient();
+}
+function processFile(evt) {
+    document.getElementById('textarea').innerHTML = "";
+    document.getElementById('textarea').innerHTML += "Importing movies into DynamoDB. Please wait..." + "\n";
+    var file = evt.target.files[0];
+    if (file) {
+        var r = new FileReader();
+        r.onload = function(e) {
+            var contents = e.target.result;
+            var allMovies = JSON.parse(contents);
 
-dynamodb.listTables(function(err, data){
-  if (err) console.log(err);
-  else console.log(data);
-});
+            allMovies.forEach(function (movie) {
+                document.getElementById('textarea').innerHTML += "Processing: " + movie.title + "\n";
+                var params = {
+                    TableName: "Movies",
+                    Item: {
+                        "year": movie.year,
+                        "title": movie.title,
+                        "info": movie.info
+                    }
+                };
+                docClient.put(params, function (err, data) {
+                    if (err) {
+                        document.getElementById('textarea').innerHTML += "Unable to add movie: " + count + movie.title + "\n";
+                        document.getElementById('textarea').innerHTML += "Error JSON: " + JSON.stringify(err) + "\n";
+                    } else {
+                        document.getElementById('textarea').innerHTML += "PutItem succeeded: " + movie.title + "\n";
+                        textarea.scrollTop = textarea.scrollHeight;
+                    }
+                });
+            });
+    };
+        r.readAsText(file);
+    } else {
+        alert("Could not read movie data file");
+    }
 }
 </script>
 </head>
@@ -36,5 +68,12 @@ dynamodb.listTables(function(err, data){
 <body>
 <div class="g-signin2" data-onsuccess="onSignIn"></div>
 hewwo :3
+<input type="file" id="fileinput" accept='application/json'/>
+<br><br>
+<textarea readonly id= "textarea" style="width:400px; height:800px"></textarea>
+
+<script>
+    document.getElementById('fileinput').addEventListener('change', processFile, false);
+</script>
 </body>
 </html>
